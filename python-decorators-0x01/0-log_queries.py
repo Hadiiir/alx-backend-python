@@ -2,18 +2,16 @@ import sqlite3
 import functools
 
 def log_queries(func):
-    """Decorator that logs SQL queries before execution"""
+    """Decorator to log SQL queries before execution"""
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
-        # Get query from either args or kwargs
-        query = kwargs.get('query', None)
-        if query is None and args:
-            query = args[0]
+        # Get query from args or kwargs
+        query = kwargs.get('query', args[0] if args else None)
         
         # Log the query
         print(f"Query: {query}")
         
-        # Execute the original function
+        # Call the original function
         return func(*args, **kwargs)
     return wrapper
 
@@ -21,11 +19,28 @@ def log_queries(func):
 def fetch_all_users(query):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
+    
+    # Create users table if it doesn't exist
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            name TEXT,
+            email TEXT
+        )
+    """)
+    
+    # Insert sample data if table is empty
+    cursor.execute("SELECT COUNT(*) FROM users")
+    if cursor.fetchone()[0] == 0:
+        cursor.execute("INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com')")
+        cursor.execute("INSERT INTO users (name, email) VALUES ('Jane Smith', 'jane@example.com')")
+        conn.commit()
+    
     cursor.execute(query)
     results = cursor.fetchall()
     conn.close()
     return results
 
-# Example usage
-if __name__ == "__main__":
-    users = fetch_all_users(query="SELECT * FROM users")
+# Fetch users while logging the query
+users = fetch_all_users(query="SELECT * FROM users")
+print("Results:", users)
