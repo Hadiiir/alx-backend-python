@@ -1,33 +1,31 @@
-# Unittests and Integration Tests Project
-
-This project focuses on the concepts of unit tests and integration tests in software development. It also covers common testing patterns and techniques such as mocking, parametrization, and fixtures.
-
-## Table of Contents
-
-- [Unittests and Integration Tests Project](#unittests-and-integration-tests-project)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [Learning Objectives](#learning-objectives)
-  - [Requirements](#requirements)
-  - [Project Structure](#project-structure)
-
-## Introduction
-
-This project aims to enhance your understanding of different testing methodologies used in software development. It covers the differences between unit tests, which focus on individual components, and integration tests, which verify interactions between multiple components. The project also delves into common testing patterns and practices, including the use of mocking, parametrization, and fixtures.
-
+# 0x03. Unittests and Integration Tests
+Alx project to demonstrate how to write unit and integration tests using the python unit testing framework and mock object library.
+- Unit testing is the process of testing that a particular function returns expected results for different set of inputs.
+- Integration tests aim to test a code path end-to-end. In general, only low level functions that make external calls such as HTTP requests, file I/O, database I/O, etc. are mocked.
 ## Learning Objectives
+At the end of this project, you are expected to be able to explain to anyone, without the help of Google:
 
-By the end of this project, you will be able to:
-
-- Differentiate between unit tests and integration tests.
-- Apply common testing patterns, such as mocking, parametrization, and fixtures.
-
+- The difference between unit and integration tests.
+- Common testing patterns such as mocking, parametrizations and fixtures
+## Resources
+- [unittest — Unit testing framework](https://docs.python.org/3/library/unittest.html)
+- [unittest.mock — mock object library](https://docs.python.org/3/library/unittest.mock.html)
+- [How to mock a readonly property with mock?](https://stackoverflow.com/questions/11836436/how-to-mock-a-readonly-property-with-mock)
+- [parameterized](https://stackoverflow.com/questions/11836436/how-to-mock-a-readonly-property-with-mock)
+- [Memoization](https://en.wikipedia.org/wiki/Memoization)
 ## Requirements
-
-- **Operating System**: Ubuntu 18.04 LTS
-- **Python Version**: Python 3.7
-- **Coding Style**: Pycodestyle (PEP 8) style (version 2.5)
-
-## Project Structure
-
-The project directory includes the following files, among others:
+- All your files will be interpreted/compiled on Ubuntu 18.04 LTS using python3 (version 3.7)
+- All your files should end with a new line
+- The first line of all your files should be exactly #!/usr/bin/env python3
+- A README.md file, at the root of the folder of the project, is mandatory
+- Your code should use the pycodestyle style (version 2.5)
+- All your files must be executable
+- All your modules should have a documentation `(python3 -c 'print(__import__("my_module").__doc__)')`
+- All your classes should have a documentation `(python3 -c 'print(__import__("my_module").MyClass.__doc__)')`
+- All your functions (inside and outside a class) should have a documentation `(python3 -c 'print(__import__("my_module").my_function.__doc__)' and python3 -c 'print(__import__("my_module").MyClass.my_function.__doc__)')`
+- A documentation is not a simple word, it’s a real sentence explaining what’s the purpose of the module, class or method (the - length of it will be verified)
+- All your functions and coroutines must be type-annotated.
+## :pencil: **Author**
+### :man: Yidnekachew Bantrga
+- [Github](https://github.com/HAdiiiir)
+- [Linkedin](https://www.linkedin.com/in/hader-gamal-5847061b4?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app)
