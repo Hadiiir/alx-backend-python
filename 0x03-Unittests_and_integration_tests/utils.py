@@ -1,26 +1,34 @@
-"""Utility functions for testing examples"""
+#!/usr/bin/env python3
+"""
+Utility functions for testing
+"""
+import requests
+from functools import wraps
+from typing import Mapping, Sequence, Any, Dict, Callable
 
-def access_nested_map(nested_map, path):
+
+def access_nested_map(nested_map: Mapping, path: Sequence) -> Any:
     """
-    Access a nested map with a sequence of keys.
+    Access a value in a nested dictionary using a sequence of keys.
     
     Args:
-        nested_map: A nested dictionary
-        path: A sequence of keys to access the nested value
+        nested_map: The nested dictionary
+        path: Sequence of keys to access the value
         
     Returns:
-        The value at the nested path
+        The accessed value
         
     Raises:
-        KeyError: If any key in the path doesn't exist
+        KeyError: If the path is invalid
     """
-    result = nested_map
     for key in path:
-        result = result[key]
-    return result
+        if not isinstance(nested_map, Mapping):
+            raise KeyError(key)
+        nested_map = nested_map[key]
+    return nested_map
 
 
-def get_json(url):
+def get_json(url: str) -> Dict:
     """
     Get JSON data from a URL.
     
@@ -30,14 +38,13 @@ def get_json(url):
     Returns:
         The JSON response as a dictionary
     """
-    import requests
     response = requests.get(url)
     return response.json()
 
 
-def memoize(func):
+def memoize(func: Callable) -> Callable:
     """
-    Memoization decorator that caches function results.
+    Decorator to cache function results.
     
     Args:
         func: The function to memoize
@@ -46,47 +53,11 @@ def memoize(func):
         The memoized function
     """
     cache = {}
-    
-    def wrapper(*args, **kwargs):
-        key = str(args) + str(sorted(kwargs.items()))
-        if key not in cache:
-            cache[key] = func(*args, **kwargs)
-        return cache[key]
-    
-    return wrapper
 
-
-# Example usage and testing
-if __name__ == "__main__":
-    # Test access_nested_map
-    print("Testing access_nested_map:")
+    @wraps(func)
+    def memoized_func(*args):
+        if args not in cache:
+            cache[args] = func(*args)
+        return cache[args]
     
-    # Test case 1
-    nested_map1 = {"a": 1}
-    path1 = ("a",)
-    result1 = access_nested_map(nested_map1, path1)
-    print(f"access_nested_map({nested_map1}, {path1}) = {result1}")
-    
-    # Test case 2
-    nested_map2 = {"a": {"b": 2}}
-    path2 = ("a",)
-    result2 = access_nested_map(nested_map2, path2)
-    print(f"access_nested_map({nested_map2}, {path2}) = {result2}")
-    
-    # Test case 3
-    nested_map3 = {"a": {"b": 2}}
-    path3 = ("a", "b")
-    result3 = access_nested_map(nested_map3, path3)
-    print(f"access_nested_map({nested_map3}, {path3}) = {result3}")
-    
-    # Test error cases
-    print("\nTesting error cases:")
-    try:
-        access_nested_map({}, ("a",))
-    except KeyError as e:
-        print(f"KeyError for empty dict: {e}")
-    
-    try:
-        access_nested_map({"a": 1}, ("a", "b"))
-    except KeyError as e:
-        print(f"KeyError for invalid path: {e}")
+    return memoized_func
