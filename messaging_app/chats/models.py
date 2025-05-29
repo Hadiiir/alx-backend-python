@@ -53,6 +53,10 @@ class User(AbstractUser):
         auto_now=True,
         help_text="Timestamp when user was last updated"
     )
+    password = models.CharField(
+        max_length=128,
+        help_text="User's password (hashed)"
+    )
 
     # Override username field to use email
     USERNAME_FIELD = 'email'
@@ -152,6 +156,10 @@ class Message(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True,
         help_text="Timestamp when message was last updated"
+    )
+    sent_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Timestamp when message was sent (alias for created_at)"
     )
 
     class Meta:
