@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from .views import UserViewSet, ConversationViewSet, MessageViewSet
 
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_root(request, format=None):
@@ -22,7 +23,6 @@ def api_root(request, format=None):
             'users': reverse('user-list', request=request, format=format),
             'conversations': reverse('conversation-list', request=request, format=format),
             'messages': reverse('message-list', request=request, format=format),
-            'auth': request.build_absolute_uri('/api/auth/'),
         },
         'authentication': {
             'login': request.build_absolute_uri('/api/auth/login/'),
@@ -32,7 +32,8 @@ def api_root(request, format=None):
         'note': 'Most endpoints require authentication. Create a user account first or login to access protected resources.'
     })
 
-# Create a router and register our viewsets
+
+# Create a DefaultRouter and register our viewsets
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'conversations', ConversationViewSet, basename='conversation')

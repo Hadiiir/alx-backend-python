@@ -18,6 +18,7 @@ User = get_user_model()
 class UserViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing users.
+    Provides CRUD operations for User model.
     """
     queryset = User.objects.all()
 
@@ -61,6 +62,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class ConversationViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing conversations.
+    Provides CRUD operations for Conversation model.
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -126,7 +128,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     def messages(self, request, pk=None):
         """Get all messages in a conversation."""
         conversation = self.get_object()
-        messages = conversation.messages.all().order_by('created_at')
+        messages = conversation.messages.all().order_by('sent_at')
         serializer = MessageSerializer(messages, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -134,6 +136,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 class MessageViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing messages.
+    Provides CRUD operations for Message model.
     """
     permission_classes = [permissions.IsAuthenticated]
 
@@ -185,7 +188,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         
         messages = self.get_queryset().filter(
             conversation__conversation_id=conversation_id
-        ).order_by('created_at')
+        ).order_by('sent_at')
         
         serializer = self.get_serializer(messages, many=True)
         return Response(serializer.data)

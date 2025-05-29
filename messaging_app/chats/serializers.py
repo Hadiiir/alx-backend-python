@@ -64,9 +64,9 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = [
             'message_id', 'sender', 'sender_id', 'conversation',
-            'message_body', 'created_at', 'updated_at'
+            'message_body', 'sent_at', 'created_at', 'updated_at'
         ]
-        read_only_fields = ['message_id', 'created_at', 'updated_at']
+        read_only_fields = ['message_id', 'sent_at', 'created_at', 'updated_at']
 
     def create(self, validated_data):
         """Create message with sender from request user if not provided."""
