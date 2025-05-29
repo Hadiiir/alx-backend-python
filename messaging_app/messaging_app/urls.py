@@ -33,5 +33,6 @@ urlpatterns = [
     path('', root_redirect, name='root'),
     path('admin/', admin.site.urls),
     path('api/', include('chats.urls')),
+    path('api-auth/', include('rest_framework.urls')),
     path('api-info/', api_info, name='api-info'),
 ]

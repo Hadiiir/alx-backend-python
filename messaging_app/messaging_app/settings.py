@@ -33,6 +33,13 @@ INSTALLED_APPS = [
     'chats',
 ]
 
+# Add django_filters if available
+try:
+    import django_filters
+    INSTALLED_APPS.append('django_filters')
+except ImportError:
+    pass
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -117,6 +124,20 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ],
 }
+
+# Add filter backends if django_filters is available
+try:
+    import django_filters
+    REST_FRAMEWORK['DEFAULT_FILTER_BACKENDS'] = [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ]
+except ImportError:
+    REST_FRAMEWORK['DEFAULT_FILTER_BACKENDS'] = [
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ]
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [

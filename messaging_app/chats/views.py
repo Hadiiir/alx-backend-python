@@ -1,11 +1,20 @@
 """
 API views for the messaging application.
 """
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+
+# Try to import django_filters, if not available, use basic filtering
+try:
+    from django_filters.rest_framework import DjangoFilterBackend
+    HAS_DJANGO_FILTERS = True
+except ImportError:
+    HAS_DJANGO_FILTERS = False
+    DjangoFilterBackend = None
+
 from .models import Conversation, Message
 from .serializers import (
     UserSerializer, UserCreateSerializer, ConversationSerializer,
@@ -21,6 +30,15 @@ class UserViewSet(viewsets.ModelViewSet):
     Provides CRUD operations for User model.
     """
     queryset = User.objects.all()
+    
+    # Set up filter backends conditionally
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    if HAS_DJANGO_FILTERS and DjangoFilterBackend:
+        filter_backends.insert(0, DjangoFilterBackend)
+    
+    search_fields = ['username', 'email', 'first_name', 'last_name']
+    ordering_fields = ['created_at', 'username', 'email']
+    ordering = ['-created_at']
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action."""
@@ -53,7 +71,11 @@ class UserViewSet(viewsets.ModelViewSet):
             Q(last_name__icontains=query) |
             Q(email__icontains=query) |
             Q(username__icontains=query)
-        ).exclude(user_id=request.user.user_id)
+        )
+        
+        # Exclude current user if authenticated
+        if request.user.is_authenticated:
+            users = users.exclude(user_id=request.user.user_id)
         
         serializer = self.get_serializer(users, many=True)
         return Response(serializer.data)
@@ -65,6 +87,16 @@ class ConversationViewSet(viewsets.ModelViewSet):
     Provides CRUD operations for Conversation model.
     """
     permission_classes = [permissions.IsAuthenticated]
+    
+    # Set up filter backends conditionally
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    if HAS_DJANGO_FILTERS and DjangoFilterBackend:
+        filter_backends.insert(0, DjangoFilterBackend)
+        filterset_fields = ['participants', 'created_at']
+    
+    search_fields = ['participants__first_name', 'participants__last_name', 'participants__email']
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['-updated_at']
 
     def get_queryset(self):
         """Return conversations where the current user is a participant."""
@@ -139,12 +171,29 @@ class MessageViewSet(viewsets.ModelViewSet):
     Provides CRUD operations for Message model.
     """
     permission_classes = [permissions.IsAuthenticated]
+    
+    # Set up filter backends conditionally
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    if HAS_DJANGO_FILTERS and DjangoFilterBackend:
+        filter_backends.insert(0, DjangoFilterBackend)
+        filterset_fields = ['conversation', 'sender', 'sent_at']
+    
+    search_fields = ['message_body', 'sender__first_name', 'sender__last_name']
+    ordering_fields = ['sent_at', 'created_at']
+    ordering = ['-sent_at']
 
     def get_queryset(self):
         """Return messages from conversations where the current user is a participant."""
-        return Message.objects.filter(
+        queryset = Message.objects.filter(
             conversation__participants=self.request.user
         ).select_related('sender', 'conversation').distinct()
+        
+        # Filter by conversation if provided in URL
+        conversation_pk = self.kwargs.get('conversation_pk')
+        if conversation_pk:
+            queryset = queryset.filter(conversation__conversation_id=conversation_pk)
+            
+        return queryset
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action."""
@@ -154,6 +203,11 @@ class MessageViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Create a new message."""
+        # Handle nested route case
+        conversation_pk = self.kwargs.get('conversation_pk')
+        if conversation_pk:
+            request.data['conversation'] = conversation_pk
+            
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
