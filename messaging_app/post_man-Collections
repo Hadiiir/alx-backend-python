@@ -1,0 +1,148 @@
+{
+  "info": {
+    "name": "Messaging App API Tests",
+    "description": "Test suite for alx-backend-python messaging app API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Get JWT Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"{{user_password}}\"\n}"
+            },
+            "url": "{{base_url}}/api/token/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Conversations",
+      "item": [
+        {
+          "name": "Start New Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"participant_id\": \"{{participant_id}}\"\n}"
+            },
+            "url": "{{base_url}}/api/conversations/start_conversation/"
+          }
+        },
+        {
+          "name": "List All Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/conversations/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Messages",
+      "item": [
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message_body\": \"Hello, this is a test message\"\n}"
+            },
+            "url": "{{base_url}}/api/conversations/{{conversation_id}}/messages/"
+          }
+        },
+        {
+          "name": "List Messages in Conversation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": "{{base_url}}/api/conversations/{{conversation_id}}/messages/"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Security Tests",
+      "item": [
+        {
+          "name": "Unauthorized Access Test",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/conversations/"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "jwt_token",
+      "value": ""
+    },
+    {
+      "key": "conversation_id",
+      "value": ""
+    },
+    {
+      "key": "user_email",
+      "value": ""
+    },
+    {
+      "key": "user_password",
+      "value": ""
+    },
+    {
+      "key": "participant_id",
+      "value": ""
+    }
+  ]
+}
