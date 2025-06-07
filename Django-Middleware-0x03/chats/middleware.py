@@ -3,20 +3,28 @@ from datetime import datetime, timedelta
 from django.http import HttpResponseForbidden
 from collections import defaultdict
 
-class RolePermissionMiddleware:
+class RolepermissionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # List of paths that require admin/moderator access
-        restricted_paths = ['/admin_chat/', '/moderator_chat/']  # Update with your paths
+        # List of paths that require special permissions
+        admin_paths = ['/admin/', '/admin-dashboard/']  # Add your admin paths here
+        moderator_paths = ['/moderate/', '/moderator-dashboard/']  # Add moderator paths
         
-        if any(request.path.startswith(path) for path in restricted_paths):
-            if not request.user.is_authenticated or not (request.user.is_staff or request.user.is_superuser):
-                return HttpResponseForbidden("You don't have permission to access this resource")
-        
-        return self.get_response(request)
+        # Check if current path requires admin permissions
+        if any(request.path.startswith(path) for path in admin_paths):
+            if not request.user.is_authenticated or not request.user.is_superuser:
+                from django.http import HttpResponseForbidden
+                return HttpResponseForbidden("Admin access required")
 
+        # Check if current path requires moderator permissions
+        if any(request.path.startswith(path) for path in moderator_paths):
+            if not request.user.is_authenticated or not (request.user.is_staff or request.user.is_superuser):
+                from django.http import HttpResponseForbidden
+                return HttpResponseForbidden("Moderator access required")
+
+        return self.get_response(request)
 
 class OffensiveLanguageMiddleware:
     def __init__(self, get_response):
@@ -58,6 +66,7 @@ class RestrictAccessByTimeMiddleware:
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
+        # Configure logger
         self.logger = logging.getLogger('request_logger')
         self.logger.setLevel(logging.INFO)
         handler = logging.FileHandler('chats/requests.log')
@@ -66,5 +75,4 @@ class RequestLoggingMiddleware:
     def __call__(self, request):
         user = request.user.username if request.user.is_authenticated else "Anonymous"
         self.logger.info(f"{datetime.now()} - User: {user} - Path: {request.path}")
-        response = self.get_response(request)
-        return response
+        return self.get_response(request)
