@@ -1,12 +1,11 @@
 {
   "info": {
     "name": "Messaging App API",
-    "_postman_id": "1a2b3c4d-5678-1234-9abc-def123456789",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "User Login",
+      "name": "JWT Login",
       "request": {
         "method": "POST",
         "header": [
@@ -14,7 +13,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{ \"username\": \"testuser\", \"password\": \"testpass\" }"
+          "raw": "{ \"username\": \"your_username\", \"password\": \"your_password\" }"
         },
         "url": {
           "raw": "http://127.0.0.1:8000/api/token/",
