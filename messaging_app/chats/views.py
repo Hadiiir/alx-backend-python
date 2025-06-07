@@ -237,7 +237,8 @@ class MessageViewSet(viewsets.ModelViewSet):
         response_serializer = MessageSerializer(message, context={'request': request})
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
     pagination_class = MessagePagination 
-    
+    permission_classes = [IsParticipantOfConversation]
+
     @action(detail=False, methods=['get'])
     def by_conversation(self, request):
         """Get messages filtered by conversation."""
