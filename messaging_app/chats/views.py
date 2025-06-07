@@ -20,6 +20,9 @@ from .serializers import (
     UserSerializer, UserCreateSerializer, ConversationSerializer,
     ConversationListSerializer, MessageSerializer, MessageCreateSerializer
 )
+from .permissions import IsParticipantOfConversation
+from .filters import MessageFilter, ConversationFilter
+from .pagination import MessagePagination, ConversationPagination
 
 User = get_user_model()
 
@@ -86,7 +89,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     ViewSet for managing conversations.
     Provides CRUD operations for Conversation model.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ConversationSerializer
+    permission_classes = [permissions.IsAuthenticated, IsParticipantOfConversation]
+    filter_class = ConversationFilter
+    pagination_class = ConversationPagination
     
     # Set up filter backends conditionally
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -100,9 +106,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Return conversations where the current user is a participant."""
-        return Conversation.objects.filter(
-            participants=self.request.user
-        ).prefetch_related('participants', 'messages__sender').distinct()
+        return self.request.user.conversations.all().prefetch_related('participants', 'messages__sender').distinct()
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action."""
@@ -170,7 +174,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     ViewSet for managing messages.
     Provides CRUD operations for Message model.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = MessageSerializer
+    permission_classes = [permissions.IsAuthenticated, IsParticipantOfConversation]
+    filter_class = MessageFilter
+    pagination_class = MessagePagination
     
     # Set up filter backends conditionally
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -186,7 +193,7 @@ class MessageViewSet(viewsets.ModelViewSet):
         """Return messages from conversations where the current user is a participant."""
         queryset = Message.objects.filter(
             conversation__participants=self.request.user
-        ).select_related('sender', 'conversation').distinct()
+        ).select_related('sender', 'conversation').order_by('-timestamp').distinct()
         
         # Filter by conversation if provided in URL
         conversation_pk = self.kwargs.get('conversation_pk')

@@ -33,8 +33,9 @@ def api_root(request, format=None):
             'messages': reverse('message-list', request=request, format=format),
         },
         'authentication': {
-            'login': request.build_absolute_uri('/api/auth/login/'),
-            'logout': request.build_absolute_uri('/api/auth/logout/'),
+            'login': request.build_absolute_uri('/api/token/'),
+            'refresh': request.build_absolute_uri('/api/token/refresh/'),
+            'api-auth': request.build_absolute_uri('/api-auth/'),
         },
         'documentation': 'This browsable API allows you to interact with the messaging system.',
         'note': 'Most endpoints require authentication. Create a user account first or login to access protected resources.'
@@ -58,4 +59,5 @@ if HAS_NESTED_ROUTERS and nested_routers:
 urlpatterns = [
     path('', api_root, name='api-root'),
     path('auth/', include('rest_framework.urls')),
-] + router.urls + nested_urls
+    path('', include(router.urls)),
+] + nested_urls
