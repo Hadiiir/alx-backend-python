@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Edit History for Message</h2>
+<div class="current">
+    <h3>Current Version:</h3>
+    <p>{{ message.content }}</p>
+</div>
+
+<h3>Previous Versions:</h3>
+{% for version in history %}
+<div class="version">
+    <p>{{ version.content }}</p>
+    <small>
+        Edited by: {{ version.edited_by.username }} |
+        {{ version.edited_at }}
+    </small>
+</div>
+{% endfor %}
+{% endblock %}

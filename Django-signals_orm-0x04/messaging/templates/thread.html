@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="message">
+    <p>{{ message.content }}</p>
+    <small>
+        From: {{ message.sender.username }} | 
+        To: {{ message.receiver.username }} |
+        {{ message.timestamp }}
+        {% if message.edited %}(edited){% endif %}
+    </small>
+    
+    {% if message.history.exists %}
+    <a href="{% url 'message_history' message.id %}">View edit history</a>
+    {% endif %}
+</div>
+
+<h3>Replies:</h3>
+{% for reply in replies %}
+    <div class="reply" style="margin-left: 20px;">
+        {% include "messaging/message.html" with message=reply %}
+    </div>
+{% endfor %}
+{% endblock %}
