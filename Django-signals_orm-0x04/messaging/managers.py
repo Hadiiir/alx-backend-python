@@ -4,8 +4,8 @@ class UnreadMessagesManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(read=False)
 
-    def for_user(self, user):
-        """Optimized query for unread messages with only necessary fields"""
+    def unread_for_user(self, user):
+        """Optimized query for unread messages for specific user"""
         return self.get_queryset().filter(receiver=user).select_related(
             'sender', 'receiver'
         ).only(

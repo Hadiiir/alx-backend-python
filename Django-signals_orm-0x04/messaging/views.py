@@ -8,6 +8,14 @@ from .models import Message, MessageHistory, Notification
 User = get_user_model()
 
 @login_required
+def inbox(request):
+    """View using custom manager to show unread messages"""
+    unread_messages = Message.unread.unread_for_user(request.user)
+    return render(request, 'messaging/inbox.html', {
+        'messages': unread_messages
+    })
+
+@login_required
 @cache_page(60)  # 60 seconds cache
 def conversation_view(request, user_id):
     """Cached view showing conversation between current user and another user"""
