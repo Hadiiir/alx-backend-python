@@ -5,13 +5,13 @@ class UnreadMessagesManager(models.Manager):
         return super().get_queryset().filter(read=False)
 
     def for_user(self, user):
+        """Optimized query for unread messages with only necessary fields"""
         return self.get_queryset().filter(receiver=user).select_related(
-            'sender',
-            'receiver'
+            'sender', 'receiver'
         ).only(
             'id',
             'content',
             'timestamp',
             'sender__username',
             'receiver__username'
-        )
+        ).order_by('-timestamp')

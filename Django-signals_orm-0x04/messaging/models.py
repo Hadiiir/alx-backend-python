@@ -1,10 +1,20 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from .managers import UnreadMessagesManager
+from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 class Message(models.Model):
+    def get_thread(self):
+        """Recursive method to get all replies with optimized queries"""
+        return self.replies.all().select_related(
+            'sender', 'receiver'
+        ).prefetch_related(
+            'replies'
+        ).only(
+            'id', 'content', 'timestamp', 'sender__username', 'receiver__username'
+        )
+    
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     content = models.TextField()
