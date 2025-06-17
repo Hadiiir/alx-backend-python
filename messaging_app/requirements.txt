@@ -13,3 +13,5 @@ python-dotenv==1.1.0
 pytz==2025.2
 sqlparse==0.5.3
 typing_extensions==4.13.2
+
+[ -s messaging_app/requirements.txt ] && echo "Requirements.txt exists and not empty" || echo "Requirements.txt missing or empty"
