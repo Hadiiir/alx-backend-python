@@ -1,0 +1,83 @@
+pipeline {
+    agent any
+
+    environment {
+        VENV_DIR = 'venv'
+        DOCKER_IMAGE = 'hunter347/messaging_app:latest'
+    }
+
+    stages {
+        stage('Clone Code') {
+            steps {
+                git branch: 'master',
+                    url: 'https://github.com/O-G-W-A-L/alx-backend-python.git',
+                    credentialsId: 'github-creds'
+            }
+        }
+
+        stage('Verify Git Branch') {
+            steps {
+                sh 'git branch || git rev-parse --abbrev-ref HEAD'
+            }
+        }
+
+        stage('Set up Python environment') {
+            steps {
+                sh 'python3 -m venv $VENV_DIR'
+                sh './$VENV_DIR/bin/python -m pip install --upgrade pip'
+
+                sh 'pip3 install -r messaging_app/requirements.txt || pip3 install -r messaging_app/Requirements.txt'
+                sh 'pip3 install pytest pytest-django'
+            }
+        }
+
+        stage('Run tests with pytest') {
+            steps {
+
+                sh './$VENV_DIR/bin/pytest chats/tests.py --junitxml=report.xml'
+            }
+        }
+
+        stage('Publish test report') {
+            steps {
+                junit 'report.xml'
+            }
+        }
+
+        stage('Build Docker image') {
+            steps {
+                sh "docker build -t $DOCKER_IMAGE -f messaging_app/Dockerfile ."
+            }
+        }
+
+        stage('Push Docker image to Docker Hub') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker push $DOCKER_IMAGE
+                        docker logout
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'report.xml', allowEmptyArchive: true
+        }
+
+        failure {
+            mail to: 'huntertest02@gmail.com',
+                 subject: 'Jenkins Build Failed',
+                 body: 'The Jenkins build for messaging_app failed. Please check the console output in Jenkins'
+        }
+    }
+}
