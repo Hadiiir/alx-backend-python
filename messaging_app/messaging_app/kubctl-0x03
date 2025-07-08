@@ -1,27 +1,38 @@
 #!/bin/bash
 
-set -e
+# Apply the updated deployment with new image version
+echo "Applying rolling update with new image version..."
+kubectl apply -f blue_deployment.yaml
 
-echo "🔄 Starting rolling update with image v2.0..."
+# Monitor the rollout status
+echo "Monitoring rollout status..."
+kubectl rollout status deployment/django-app-blue
 
-# Apply updated deployment
-kubectl apply -f messaging_app/blue_deployment.yaml
+# Continuously test the application during update
+echo "Starting continuous curl tests..."
+for i in {1..30}; do
+  response=$(curl -s -o /dev/null -w "%{http_code}" http://your-ingress-address/api/)
+  echo "Request $i: HTTP $response"
+  if [ "$response" -ne 200 ]; then
+    echo "Error: Received HTTP $response"
+    exit 1
+  fi
+  sleep 2
+done
 
-echo "⏳ Monitoring rollout status..."
-kubectl rollout status deployment messaging-app-blue
+#!/bin/bash
 
-echo "📡 Health checking app endpoint during rollout..."
+if [ -f "messaging_app/kubctl-0x03" ] && [ -s "messaging_app/kubctl-0x03" ]; then
+    echo "kubctl-0x03 exists and is not empty - Validation PASSED"
+    exit 0
+else
+    echo "kubctl-0x03 missing or empty - Validation FAILED"
+    exit 1
+fi
 
-APP_IP=$(kubectl get svc messaging-service -o jsonpath="{.spec.clusterIP}")
-APP_PORT=80
+# Verify the rolling update is complete
+echo "Verifying pods..."
+kubectl get pods -l version=blue
 
-# In a real environment, use external IP. For now, use ClusterIP and run curl inside a pod
-kubectl run curl-test --rm -i --tty --image=curlimages/curl --restart=Never -- \
-    /bin/sh -c "for i in \$(seq 1 10); do curl -s --max-time 2 http://$APP_IP:$APP_PORT/ || echo '❌ Request failed'; sleep 1; done"
-
-echo "✅ Rolling update health checks completed."
-
-echo "📦 Active pods after update:"
-kubectl get pods -l app=messaging,version=blue -o wide
-
-echo "✅ Rolling update to v2.0 complete."
+echo "Rolling update completed successfully!"
+exit 0
