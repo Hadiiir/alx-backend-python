@@ -18,5 +18,4 @@ def fetch_all_users(query):
     conn.close()
     return results
 
-# Example usage
 users = fetch_all_users(query="SELECT * FROM users")
