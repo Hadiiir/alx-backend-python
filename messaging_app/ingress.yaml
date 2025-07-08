@@ -1,16 +1,49 @@
-# Check if file exists
-if [ -f "messaging_app/ingress.yaml" ]; then
-    echo "File exists"
-    
-    # Check if file is not empty
-    if [ -s "messaging_app/ingress.yaml" ]; then
-        echo "File is not empty"
-        exit 0  # Success - file exists and is not empty
-    else
-        echo "File exists but is empty"
-        exit 1  # Failure - file exists but empty
-    fi
-else
-    echo "File does not exist"
-    exit 1  # Failure - file doesn't exist
-fi
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: django-app-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: messaging-app.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: django-app-service
+            port:
+              number: 80
+      - path: /api/
+        pathType: Prefix
+        backend:
+          service:
+            name: django-app-service
+            port:
+              number: 80
+      - path: /admin/
+        pathType: Prefix
+        backend:
+          service:
+            name: django-app-service
+            port:
+              number: 80
+      - path: /static/
+        pathType: Prefix
+        backend:
+          service:
+            name: django-app-service
+            port:
+              number: 80
+  # Optional: Add TLS configuration if you have SSL certificates
+  # tls:
+  # - hosts:
+  #   - messaging-app.local
+  #   secretName: messaging-app-tls
